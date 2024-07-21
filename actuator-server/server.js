@@ -6,52 +6,73 @@ const gpiox = require("@iiot2k/gpiox");
 const app = express();
 const PORT = 3000;
 
-// Define GPIO pins for actuators
-const actuatorPins = [6, 13, 19, 26];
+// Define GPIO pins for actuators (forward and backward for each)
+const actuatorPins = [
+    { forward: 26, backward: 19 },   // Actuator 1: GPIO 6 (forward), GPIO 5 (backward)
+    { forward: 13, backward: 6 }, // Actuator 2: GPIO 13 (forward), GPIO 12 (backward)
+    { forward: 12, backward: 16 }, // Actuator 3: GPIO 19 (forward), GPIO 16 (backward)
+    { forward: 21, backward: 20 }  // Actuator 4: GPIO 26 (forward), GPIO 20 (backward)
+];
 
 // Initialize GPIO pins as outputs
-actuatorPins.forEach(pin => gpiox.init_gpio(pin, gpiox.GPIO_MODE_OUTPUT, 0));
+actuatorPins.forEach(actuator => {
+    gpiox.init_gpio(actuator.forward, gpiox.GPIO_MODE_OUTPUT, 0);
+    gpiox.init_gpio(actuator.backward, gpiox.GPIO_MODE_OUTPUT, 0);
+});
 
-// Function to activate actuators sequentially for 2 seconds each
-async function activateActuators() {
+// Function to create delay using promises
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Function to control actuators sequentially
+async function controlActuators() {
     try {
-        // Sequentially activate each actuator for 2 seconds
         for (let i = 0; i < actuatorPins.length; i++) {
-            const pin = actuatorPins[i];
+            const actuator = actuatorPins[i];
 
-            // Turn on the current actuator
-            gpiox.set_gpio(pin, 1);
+            // Move forward
+            gpiox.set_gpio(actuator.forward, 1);
+            gpiox.set_gpio(actuator.backward, 0);
+            console.log(`Actuator ${i + 1} moving forward.`);
+            await delay(6000);
 
-            // Wait for 2 seconds
-            await delay(2000);
+            // Brake
+            gpiox.set_gpio(actuator.forward, 0);
+            gpiox.set_gpio(actuator.backward, 0);
+            console.log(`Actuator ${i + 1} braking.`);
+            await delay(4000);
 
-            // Turn off the current actuator
-            gpiox.set_gpio(pin, 0);
+            // Move backward
+            gpiox.set_gpio(actuator.forward, 0);
+            gpiox.set_gpio(actuator.backward, 1);
+            console.log(`Actuator ${i + 1} moving backward.`);
+            await delay(6000);
+
+            // Brake
+            gpiox.set_gpio(actuator.forward, 0);
+            gpiox.set_gpio(actuator.backward, 0);
+            console.log(`Actuator ${i + 1} braking.`);
+            await delay(4000);
         }
 
-        console.log('Actuators activated sequentially for 2 seconds each.');
+        console.log('Actuator control sequence completed.');
     } catch (error) {
         console.error('Error:', error);
     }
 }
 
-// Utility function to create delay using promises
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Endpoint to activate actuators
-app.get('/activate', async (req, res) => {
-    await activateActuators();
-    res.send('Actuators activated sequentially for 2 seconds each.');
+// Endpoint to control actuators
+app.get('/control', async (req, res) => {
+    await controlActuators();
+    res.send('Actuator control sequence completed.');
 });
 
-// Initialize and activate actuators on server startup
-activateActuators().then(() => {
-    // Start the server after initialization
+// Initialize and start server
+controlActuators().then(() => {
     app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
     });
 }).catch(err => {
-    console.error('Error initializing and activating actuators:', err);
+    console.error('Error initializing and controlling actuators:', err);
 });
