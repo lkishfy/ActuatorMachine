@@ -8,10 +8,10 @@ const PORT = 3000;
 
 // Define GPIO pins for actuators (forward and backward for each)
 const actuatorPins = [
-    { forward: 5, backward: 22 },   // Actuator 1: GPIO 6 (forward), GPIO 5 (backward)
+    { forward: 22, backward: 5 },   // Actuator 1: GPIO 6 (forward), GPIO 5 (backward)
     { forward: 13, backward: 26 }, // Actuator 2: GPIO 13 (forward), GPIO 12 (backward)
-    { forward: 21, backward: 20 }, // Actuator 3: GPIO 19 (forward), GPIO 16 (backward)
-    { forward: 16, backward: 12 }  // Actuator 4: GPIO 26 (forward), GPIO 20 (backward)
+    { forward: 20, backward: 21 }, // Actuator 3: GPIO 19 (forward), GPIO 16 (backward)
+    { forward: 12, backward: 16 }  // Actuator 4: GPIO 26 (forward), GPIO 20 (backward)
 ];
 
 // Initialize GPIO pins as outputs
