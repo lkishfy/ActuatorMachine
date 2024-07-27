@@ -2,9 +2,20 @@
 
 const express = require('express');
 const gpiox = require("@iiot2k/gpiox");
-
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
+
+const corsOptions = {
+    origin: 'http://localhost:3000', // Make sure this matches your frontend origin exactly
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 200
+  };
+
+app.use(cors(corsOptions));
+app.use(bodyParser.json());
 
 // Define GPIO pins for actuators (forward and backward for each)
 const actuatorPins = [
@@ -25,6 +36,20 @@ actuatorPins.forEach(actuator => {
 // Function to create delay using promises
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function moveActuator(index, direction) {
+    const actuator = actuatorPins[index];
+    if (direction === 'forward') {
+        gpiox.set_gpio(actuator.forward, 1);
+        gpiox.set_gpio(actuator.backward, 0);
+    } else {
+        gpiox.set_gpio(actuator.forward, 0);
+        gpiox.set_gpio(actuator.backward, 1);
+    }
+    await delay(2000); // Move for 2 seconds
+    gpiox.set_gpio(actuator.forward, 0);
+    gpiox.set_gpio(actuator.backward, 0);
 }
 
 function brakeAllActuators() {
@@ -48,7 +73,7 @@ async function controlActuators() {
             gpiox.set_gpio(actuator.forward, 1);
             gpiox.set_gpio(actuator.backward, 0);
             console.log(`Actuator ${i + 1} moving forward.`);
-            await delay(2000);
+            await delay(4000);
 
             // Brake
             gpiox.set_gpio(actuator.forward, 0);
@@ -60,7 +85,7 @@ async function controlActuators() {
             gpiox.set_gpio(actuator.forward, 0);
             gpiox.set_gpio(actuator.backward, 1);
             console.log(`Actuator ${i + 1} moving backward.`);
-            await delay(2000);
+            await delay(4000);
 
             // Brake
             gpiox.set_gpio(actuator.forward, 0);
@@ -76,9 +101,19 @@ async function controlActuators() {
 }
 
 // Endpoint to control actuators
-app.get('/control', async (req, res) => {
-    await controlActuators();
-    res.send('Actuator control sequence completed.');
+app.post('/control', cors(corsOptions), async (req, res) => {
+    const { index, direction } = req.body;
+    if (index >= 0 && index < actuatorPins.length && (direction === 'forward' || direction === 'backward')) {
+      await moveActuator(index, direction);
+      res.send(`Actuator ${index + 1} moved ${direction}.`);
+    } else {
+      res.status(400).send('Invalid request.');
+    }
+  });
+
+app.get('/testCors', (req, res) => {
+    res.send('CORS is working!');
+    console.log("CORS is working");
 });
 
 // Initialize and start server
