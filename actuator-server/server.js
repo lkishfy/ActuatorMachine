@@ -22,7 +22,6 @@ const actuatorPins = [
     { forward: 21, backward: 16 },   // Actuator 1: GPIO 6 (forward), GPIO 5 (backward)
     { forward: 12, backward: 25 }, // Actuator 2: GPIO 13 (forward), GPIO 12 (backward)
     { forward: 23, backward: 18 }, // Actuator 3: GPIO 19 (forward), GPIO 16 (backward)
-    { forward: 12, backward: 16 }  // Actuator 4: GPIO 26 (forward), GPIO 20 (backward)
 ];
 
 // Initialize GPIO pins as outputs
@@ -47,7 +46,7 @@ async function moveActuator(index, direction) {
         gpiox.set_gpio(actuator.forward, 0);
         gpiox.set_gpio(actuator.backward, 1);
     }
-    await delay(2000); // Move for 2 seconds
+    await delay(1000); // Move for 2 seconds
     gpiox.set_gpio(actuator.forward, 0);
     gpiox.set_gpio(actuator.backward, 0);
 }

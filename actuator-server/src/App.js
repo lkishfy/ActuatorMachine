@@ -28,7 +28,7 @@ const App = () => {
         <h1>Actuator Control</h1>
         {['Forward', 'Backward'].map((direction, dirIdx) => (
           <div key={dirIdx}>
-            {Array.from({ length: 4 }, (_, idx) => (
+            {Array.from({ length: 3 }, (_, idx) => (
               <button
                 key={idx}
                 onClick={() => controlActuator(idx, direction.toLowerCase())}
