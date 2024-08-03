@@ -19,9 +19,9 @@ app.use(bodyParser.json());
 
 // Define GPIO pins for actuators (forward and backward for each)
 const actuatorPins = [
-    { forward: 22, backward: 5 },   // Actuator 1: GPIO 6 (forward), GPIO 5 (backward)
-    { forward: 13, backward: 26 }, // Actuator 2: GPIO 13 (forward), GPIO 12 (backward)
-    { forward: 20, backward: 21 }, // Actuator 3: GPIO 19 (forward), GPIO 16 (backward)
+    { forward: 21, backward: 16 },   // Actuator 1: GPIO 6 (forward), GPIO 5 (backward)
+    { forward: 12, backward: 25 }, // Actuator 2: GPIO 13 (forward), GPIO 12 (backward)
+    { forward: 23, backward: 18 }, // Actuator 3: GPIO 19 (forward), GPIO 16 (backward)
     { forward: 12, backward: 16 }  // Actuator 4: GPIO 26 (forward), GPIO 20 (backward)
 ];
 
